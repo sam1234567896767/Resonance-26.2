@@ -18,6 +18,11 @@ jobs:
           API=$(curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o "<version>[^<]*+$MC</version>" | tail -1 | sed 's/<[^>]*>//g')
           echo "loader=$LOADER api=$API"
           sed -i "s/^loader_version=.*/loader_version=$LOADER/; s/^fabric_api_version=.*/fabric_api_version=$API/" gradle.properties
+      - name: Add Minecraft libraries server
+        working-directory: Resonance-26.2
+        run: |
+          sed -i "s#repositories { maven { url = 'https://maven.fabricmc.net/' } }#repositories { maven { url = 'https://maven.fabricmc.net/' }; maven { url = 'https://libraries.minecraft.net/' }; mavenCentral() }#" build.gradle
+          grep repositories build.gradle
       - run: gradle build
         working-directory: Resonance-26.2
       - uses: actions/upload-artifact@v4
