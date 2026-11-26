@@ -21,8 +21,15 @@ jobs:
       - name: Add Minecraft libraries server
         working-directory: Resonance-26.2
         run: |
-          sed -i "s#repositories { maven { url = 'https://maven.fabricmc.net/' } }#repositories { maven { url = 'https://maven.fabricmc.net/' }; maven { url = 'https://libraries.minecraft.net/' }; mavenCentral() }#" build.gradle
-          grep repositories build.gradle
+          cat >> build.gradle <<'EOF'
+
+          repositories {
+              maven { url = 'https://libraries.minecraft.net/' }
+              mavenCentral()
+          }
+          EOF
+          cat build.gradle
+          cat gradle.properties
       - run: gradle build
         working-directory: Resonance-26.2
       - uses: actions/upload-artifact@v4
