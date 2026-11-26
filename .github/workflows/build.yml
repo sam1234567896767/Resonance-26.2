@@ -1,0 +1,26 @@
+name: Build jar
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: unzip -q Resonance-26.2.zip
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 25 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: current }
+      - name: Fill versions
+        working-directory: Resonance-26.2
+        run: |
+          MC=26.2
+          LOADER=$(curl -s https://meta.fabricmc.net/v2/versions/loader | python3 -c "import sys,json;print([x['version'] for x in json.load(sys.stdin) if x['stable']][0])")
+          API=$(curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o "<version>[^<]*+$MC</version>" | tail -1 | sed 's/<[^>]*>//g')
+          echo "loader=$LOADER api=$API"
+          sed -i "s/^loader_version=.*/loader_version=$LOADER/; s/^fabric_api_version=.*/fabric_api_version=$API/" gradle.properties
+      - run: gradle build
+        working-directory: Resonance-26.2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resonance-jar
+          path: Resonance-26.2/build/libs/*.jar
